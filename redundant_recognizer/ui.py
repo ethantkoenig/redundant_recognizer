@@ -47,6 +47,9 @@ def populate_ui(talon_phrase, alternatives):
     _root.update_idletasks()
 
 
+def stop_ui():
+    _root.destroy()
+
 def _add_alternative(index, talon_words, alternative_words):
     global _root, _bold_font, _normal_font
 

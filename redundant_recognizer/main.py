@@ -63,6 +63,9 @@ class RequestHandler(http.server.BaseHTTPRequestHandler):
         talon_phrase = self.rfile.read(length).decode("ascii").lower()
         self.send_response(200)
         self.end_headers()
+        if talon_phrase "kill redundant recognizer":
+            redundant_recognizer.ui.stop_ui()
+            return
         print(f"Talon phrase: {talon_phrase}")
         alternatives = recognizer.get_alternatives()
         if not alternatives:
@@ -71,6 +74,10 @@ class RequestHandler(http.server.BaseHTTPRequestHandler):
         redundant_recognizer.ui.populate_ui(talon_phrase, alternatives)
 
         self.wfile.write(json.dumps(alternatives).encode("ascii"))
+
+
+def serve_http(port):
+    http.server.HTTPServer(("", port), RequestHandler).serve_forever()
 
 
 def parse_args():
@@ -85,5 +92,5 @@ def parse_args():
 def main():
     args = parse_args()
     threading.Thread(target=lambda: audio_loop(args.model), daemon=True).start()
-    threading.Thread(target=redundant_recognizer.ui.ui_loop, daemon=True).start()
-    http.server.HTTPServer(("", args.port), RequestHandler).serve_forever()
+    threading.Thread(target=lambda: serve_http(args.port), daemon=True).start()
+    redundant_recognizer.ui.ui_loop()
