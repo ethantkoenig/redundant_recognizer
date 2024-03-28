@@ -8,8 +8,14 @@ Talon's transcription is incorrect.
 
 ## Requirements
 
-On Ubuntu/Debian, the following packages are required to install (via pipx) and run the application:
+Ubuntu/Debian:
 
 ```
-sudo apt install build-essential portaudio19-dev python3-tk
+sudo apt install build-essential portaudio19-dev
+```
+
+MacOS:
+
+```
+brew install portaudio
 ```
