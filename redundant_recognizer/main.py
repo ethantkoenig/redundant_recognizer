@@ -27,8 +27,8 @@ def create_mic_stream():
 
 def audio_loop(model_path):
     global recognizer
-    stream = create_mic_stream()
     recognizer = redundant_recognizer.recognizer.Recognizer(model_path)
+    stream = create_mic_stream()
     quiet_since = None
     while True:
         data = stream.read(4096)
@@ -70,6 +70,8 @@ class RequestHandler(http.server.BaseHTTPRequestHandler):
         alternatives = recognizer.get_alternatives()
         if not alternatives:
             return
+        
+
 
         redundant_recognizer.ui.populate_ui(talon_phrase, alternatives)
 
