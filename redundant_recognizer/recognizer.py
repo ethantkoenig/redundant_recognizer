@@ -17,7 +17,7 @@ _phrase_commands = [
 ]
 
 _phrase_command_mistakes = {
-    "say": ["day", "said", "same"],
+    "say": ["day", "said", "same", "they"],
 }
 
 _phrase_command_triggers = {
