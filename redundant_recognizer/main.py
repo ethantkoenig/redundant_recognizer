@@ -1,7 +1,9 @@
 import argparse
 import audioop
+import fcntl
 import http.server
 import json
+import os
 import threading
 import time
 
@@ -52,10 +54,10 @@ class RequestHandler(http.server.BaseHTTPRequestHandler):
 
         # Sleep for a bit, to let the audio loop catch up on recent samples.
         time.sleep(0.2)
-        
+
         self.send_response(200)
         self.end_headers()
-        
+
         alternatives = recognizer.get_alternatives()
 
         self.wfile.write(json.dumps(alternatives).encode("ascii"))
@@ -71,10 +73,35 @@ def parse_args():
         "--port", type=int, required=True, help="port which HTTP server will bind to"
     )
     parser.add_argument("--model", type=str, required=True, help="path to a vosk model")
+    parser.add_argument(
+        "--pidfile",
+        type=str,
+        help="path to a pid file that the process will lock and write",
+    )
     return parser.parse_args()
+
+
+def lock_and_write_pid_file(path: str):
+    # Note: need to store file object in a global, otherwise it gets garbage
+    # collected and the lock is released.
+    global file
+    file = open(path, "a+")
+    try:
+        fcntl.flock(file.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)
+    except OSError as e:
+        raise RuntimeError(f"Failed to lock {path}") from e
+
+    file.seek(0)
+    file.truncate()
+    file.write(f"{os.getpid()}\n")
+    file.flush()
 
 
 def main():
     args = parse_args()
+
+    if args.pidfile:
+        lock_and_write_pid_file(args.pidfile)
+
     threading.Thread(target=lambda: audio_loop(args.model), daemon=True).start()
     serve_http(args.port)
